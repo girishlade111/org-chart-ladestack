@@ -1,30 +1,87 @@
-# Org Chart
+# Org Chart — Interactive Organization Chart
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+A full-screen, interactive organization-chart visualizer. Renders a company hierarchy (CEO → VPs → managers → individual contributors) with zoom, pan, expand/collapse nodes, job-family color coding, and a legend — all client-side, no backend.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/gileb64375-5584s-projects/v0-org-chart)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/kYMPKynlDn4)
+## What It Does
 
-## Overview
+- **Visual hierarchy tree** — builds the org tree from a flat employee list, renders cards connected by styled lines
+- **Zoom & pan** — zoom controls plus drag-to-pan navigation across large charts
+- **Expand / collapse** — click any manager card to collapse or expand their subtree
+- **Job-family color coding** — Engineering, Design, Product, Operations, Leadership each get a color, explained in the legend
+- **Employee cards** — avatar, name, role, and job family on every card
+- **Chart controls** — view options and navigation helpers
+- **Dark/light theme support** via `next-themes`
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## Tech Stack
+
+- **Next.js 15** (App Router) — `output: "export"` static build
+- **React 19**, **TypeScript**
+- **Tailwind CSS 3** + **shadcn/ui** components (Radix UI primitives)
+- **lucide-react** — icons
+
+## Quick Start
+
+```bash
+npm install
+npm run dev
+# open http://localhost:3000
+
+# production build (static export -> out/)
+npm run build
+```
+
+No environment variables, no backend, no database — everything runs in the browser.
+
+## Project Structure
+
+```
+app/
+  page.tsx            # full-screen home, renders <OrgChart />
+  layout.tsx          # root layout + theme provider
+  globals.css         # Tailwind + custom styles
+components/
+  org-chart.tsx       # main chart: zoom/pan state, expand/collapse
+  employee-card.tsx   # avatar + name + role card
+  connection-lines.tsx# SVG lines between nodes
+  chart-controls.tsx  # view controls
+  zoom-controls.tsx   # zoom in/out buttons
+  chart-legend.tsx    # job-family color legend
+  ui/                 # shadcn/ui primitives
+data/
+  employees.ts        # employee list: { name, manager, role, jobFamily }
+types/
+  org-chart.ts        # OrgNode / Employee types
+utils/
+  hierarchy.ts        # flat list -> tree builder
+  connections.ts      # connection-line geometry
+  styling.ts          # job-family color mapping
+```
+
+## Customizing the Data
+
+The chart reads from `data/employees.ts` — a flat array where each employee has a `name` and a `manager` (the CEO's manager is an empty string). To visualize your own org, replace that array and keep the same shape:
+
+```ts
+{ name: "Jane D", manager: "Emma T", role: "Engineering Manager", jobFamily: "Engineering" }
+```
+
+`utils/hierarchy.ts` builds the tree; `utils/styling.ts` maps job families to colors — add your own families there.
 
 ## Deployment
 
-Your project is live at:
+Deployed as a **static site** — the Next.js build exports to `out/` and is served from GitHub Pages:
 
-**[https://vercel.com/gileb64375-5584s-projects/v0-org-chart](https://vercel.com/gileb64375-5584s-projects/v0-org-chart)**
+- Live: https://girishlade111.github.io/org-chart-ladestack/
 
-## Build your app
+Note: `next.config.mjs` sets `basePath: "/org-chart-ladestack"` for the GitHub Pages subpath. For a root-domain deploy (Vercel, Netlify, Cloudflare Pages), remove the `basePath` line and rebuild.
 
-Continue building your app on:
+## Development Notes
 
-**[https://v0.app/chat/projects/kYMPKynlDn4](https://v0.app/chat/projects/kYMPKynlDn4)**
+- Next.js pinned to 15.2.8 (security fix for CVE-2025-55182, Dec 2025 advisory)
+- Build ignores ESLint/TypeScript errors (`ignoreDuringBuilds` / `ignoreBuildErrors`) to keep static export friction-free
+- Images set to `unoptimized` — required for static export
+- Originally scaffolded with [v0](https://v0.app); customized after export
 
-## How It Works
+---
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+Built by Girish Lade — [ladestack.in](https://ladestack.in)
